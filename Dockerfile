@@ -37,6 +37,35 @@ RUN ln -s /var/log/xdebug/xdebug.log /var/www/log/ && \
     mkdir /var/log/xdebug && \
     touch /var/log/xdebug/xdebug.log
 
+# Install Google Page Speed for Apache
+RUN wget https://dl-ssl.google.com/dl/linux/direct/mod-pagespeed-stable_current_amd64.deb && \
+    dpkg -i mod-pagespeed-stable_current_amd64.deb && \
+    rm mod-pagespeed-stable_current_amd64.deb
+
+# Disable Google Pagespeed
+RUN sed -ri 's/\s*ModPagespeed on/    ModPagespeed off/g' /etc/apache2/mods-available/pagespeed.conf
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php
+RUN mv composer.phar /usr/local/bin/composer
+
+#Set Composer Paths
+RUN export PATH="/home/ubuntu/.composer/vendor/bin:$PATH"
+RUN echo "export PATH=\"/home/ubuntu/.composer/vendor/bin:$PATH\"" >> ~/.bashrc
+
+# Install Drush 8.
+RUN su -c "composer global require drush/drush:8.*" -s /bin/sh ubuntu
+RUN su -c "composer global update" -s /bin/sh ubuntu
+RUN ln -sf /home/ubuntu/.composer/vendor/bin/drush /usr/bin/drush
+
+#Install Drupal Console
+RUN curl https://drupalconsole.com/installer -L -o drupal.phar
+RUN mv drupal.phar /usr/local/bin/drupal
+RUN chmod +x /usr/local/bin/drupal
+
+#Install Platform CLI
+RUN curl -sS https://platform.sh/cli/installer | php
+
 # Install JRE (needed for some testing tools like sitespeed.io) and libs for PhantomJS.
 RUN apt-get -y install default-jre libfreetype6 libfontconfig
 
@@ -68,9 +97,6 @@ RUN wget https://github.com/RustJason/xhprof/archive/php7.tar.gz && \
 # Tests fail:
 # make test && \
 
-# Disable Google Pagespeed
-RUN sed -ri 's/\s*ModPagespeed on/    ModPagespeed off/g' /etc/apache2/mods-available/pagespeed.conf
-
 # Local testing via BrowserStack automated tests
 RUN wget https://www.browserstack.com/browserstack-local/BrowserStackLocal-linux-x64.zip && \
     unzip BrowserStackLocal-linux-x64.zip && \
@@ -101,9 +127,6 @@ RUN apt-get -y install sudo && \
 USER ubuntu
 RUN echo 'LOCAL_BASHRC="$HOME/.local/bashrc"; test -f "${LOCAL_BASHRC}" && source "${LOCAL_BASHRC}"' >> ~/.bashrc
 USER root
-
-#install selenium 
-RUN cd ~ && wget http://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.1.jar
 
 # Clean-up installation.
 RUN apt-get -y autoclean && \
