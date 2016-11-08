@@ -103,7 +103,7 @@ RUN echo 'LOCAL_BASHRC="$HOME/.local/bashrc"; test -f "${LOCAL_BASHRC}" && sourc
 USER root
 
 #install selenium 
-RUN wget http://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.1.jar
+RUN cd ~ && wget http://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.1.jar
 
 # Clean-up installation.
 RUN apt-get -y autoclean && \
