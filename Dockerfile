@@ -8,8 +8,9 @@ RUN apt-get update && \
     apt-get -y upgrade
 
 # Install tools for documenting.
-RUN apt-get -y install python-sphinx python-pip doxygen && \
-    pip install sphinx_rtd_theme breathe
+RUN apt-get -y install python-sphinx python-pip doxygen
+RUN pip install --upgrade pip
+RUN pip install sphinx_rtd_theme breathe
 
 # XML needed by PHPCodeSniffer 2.3+
 # AST and SQLite needed by Phan
